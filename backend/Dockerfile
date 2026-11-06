@@ -1,13 +1,28 @@
-FROM php:8.2-fpm-alpine
+FROM node:20-alpine AS base
 
-RUN apk add --no-cache curl git unzip libzip-dev zip ffmpeg python3 py3-pip && docker-php-ext-install zip pdo pdo_mysql && pip3 install --no-cache-dir --break-system-packages yt-dlp==2026.10.26
+RUN apk add --no-cache \
+        bash \
+        curl \
+        ffmpeg \
+        python3 \
+        py3-pip
 
-COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+ARG YTDLP_VERSION=2026.10.26
+
+RUN pip3 install --no-cache-dir --break-system-packages "yt-dlp==${YTDLP_VERSION}"
 
 WORKDIR /var/www
 
-EXPOSE 9000
+FROM base AS deps
+COPY package.json package-lock.json* ./
+RUN npm ci
 
-CMD [ "php-fpm" ]
+FROM base AS runner
+COPY --from=deps /var/www/node_modules ./node_modules
+COPY . .
 
+RUN mkdir -p /var/www/storage/downloads
 
+EXPOSE 3000
+
+CMD ["npm", "run", "dev"]

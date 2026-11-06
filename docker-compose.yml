@@ -1,51 +1,78 @@
-version: "3.8"
-
 services:
   app:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: hori-backend
+      args:
+        YTDLP_VERSION: ${YTDLP_VERSION:-2026.10.26}
+    container_name: hori-app
     restart: unless-stopped
     working_dir: /var/www
+    env_file:
+      - ./backend/.env
     volumes:
       - ./backend:/var/www
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
+      - /var/www/node_modules
+      - ./storage/downloads:/var/www/storage/downloads
     depends_on:
-      - redis
+      redis:
+        condition: service_healthy
     networks:
-      - hori-app
+      - hori
+
+  queue:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+      args:
+        YTDLP_VERSION: ${YTDLP_VERSION:-2026.10.26}
+    container_name: hori-queue
+    restart: unless-stopped
+    working_dir: /var/www
+    env_file:
+      - ./backend/.env
+    command: tsx src/queue/worker.ts
+    volumes:
+      - ./backend:/var/www
+      - /var/www/node_modules
+      - ./storage/downloads:/var/www/storage/downloads
+    depends_on:
+      redis:
+        condition: service_healthy
+    networks:
+      - hori
 
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27-alpine
     container_name: hori-nginx
     restart: unless-stopped
     ports:
       - "8080:80"
     volumes:
-      - ./backend:/var/www
-      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+      - ./frontend:/usr/share/nginx/html:ro
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
     depends_on:
       - app
     networks:
-      - hori-app
+      - hori
 
   redis:
     image: redis:7-alpine
     container_name: hori-redis
     restart: unless-stopped
-    ports:
-      - "6379:6379"
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
     volumes:
       - redis-data:/data
-    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
     networks:
-      - hori-app
+      - hori
 
 networks:
-  hori-app:
+  hori:
     driver: bridge
 
 volumes:
