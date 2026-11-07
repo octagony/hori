@@ -31,7 +31,7 @@ services:
     working_dir: /var/www
     env_file:
       - ./backend/.env
-    command: tsx src/queue/worker.ts
+    command: npm run dev:worker
     volumes:
       - ./backend:/var/www
       - /var/www/node_modules
@@ -60,7 +60,7 @@ services:
     image: redis:7-alpine
     container_name: hori-redis
     restart: unless-stopped
-    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy allkeys-lru
+    command: redis-server --appendonly yes --maxmemory 512mb --maxmemory-policy noeviction
     volumes:
       - redis-data:/data
     healthcheck:

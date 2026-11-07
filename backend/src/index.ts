@@ -1,8 +1,10 @@
 import { serve } from "@hono/node-server";
+import { Queue } from "bullmq";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
 import { prettyJSON } from "hono/pretty-json";
+import { DOWNLOADS_WORKER_NAME } from "./utils/constants";
 
 const app = new Hono();
 
@@ -15,6 +17,21 @@ app.get('/', (c) => {
     text: 'Test text'
   })
 });
+
+
+app.post('/api/test-queue', async (c) => {
+ const queue = new Queue(DOWNLOADS_WORKER_NAME, {connection: {url: process.env.REDIS_URL}});
+
+ const job = await queue.add('download-video', {
+  url: 'https://www.youtube.com/watch?v=w-sQRS-Lc9k',
+  format: 'mp4'
+ });
+
+ return c.json({
+  message: 'Add task to worker',
+  jobId: job.id
+ })
+})
 
 const port = Number(process.env.PORT) || 3000;
 

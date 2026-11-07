@@ -1,0 +1,1 @@
+export const DOWNLOADS_WORKER_NAME = 'downloads';
