@@ -21,3 +21,7 @@ pnpm-debug.log*
 lerna-debug.log*
 
 .DS_Store
+
+# STORAGE
+storage
+storage/*

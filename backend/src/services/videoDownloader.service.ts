@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { IVideoInfo } from "@/types/IVideo.interface";
-import { YTDLP_ARG_DUMP_SINGLE_JSON, YTDLP_ARG_NO_DOWNLOAD, YTDLP_ARG_NO_PLAYLIST, YTDLP_ARG_NO_WARNINGS } from "@/utils/constants";
+import { YTDLP_ARG_DUMP_SINGLE_JSON, YTDLP_ARG_FORMAT, YTDLP_ARG_MERGE_OUTPUT_FORMAT, YTDLP_ARG_NO_DOWNLOAD, YTDLP_ARG_NO_PLAYLIST, YTDLP_ARG_NO_WARNINGS, YTDLP_ARG_OUTPUT, YTDLP_ARG_PRINT_JSON, YTDLP_PARAM_BEST_QUALITY, YTDLP_PARAM_MP4 } from "@/utils/constants";
 
 export class VideoDownloaderService {
 	private readonly binary: string;
@@ -70,6 +70,37 @@ export class VideoDownloaderService {
 		});
 	}
 
+	async download(url: string, downloadDir: string, jobId: string): Promise<string> {
+		const { mkdir } = await import('node:fs/promises');
+		await mkdir(downloadDir, { recursive: true });
+
+		const args = [
+			YTDLP_ARG_NO_WARNINGS,
+			YTDLP_ARG_NO_PLAYLIST,
+			YTDLP_ARG_FORMAT, YTDLP_PARAM_BEST_QUALITY,
+			YTDLP_ARG_OUTPUT, `${downloadDir}/${jobId}.%(ext)s`,
+			YTDLP_ARG_MERGE_OUTPUT_FORMAT, YTDLP_PARAM_MP4,
+			YTDLP_ARG_PRINT_JSON,
+			url,
+		];
+
+		try {
+			const stdout = await this.execute(args);
+
+			const lines = stdout.trim().split('\n');
+			const lastLine = lines[lines.length - 1]!;
+
+			let filePath = '';
+
+			const info = JSON.parse(lastLine);
+			filePath = info._filename || info.filepath || `${downloadDir}/${jobId}.${info.ext}`;
+
+			return filePath;
+		} catch (err) {
+			throw new Error(`Error in download ${(err as Error).message}`);
+		}
+	}
+
 	private normalizeInfo(raw: any): IVideoInfo {
 		return {
 			id: raw.id,
@@ -90,4 +121,4 @@ export class VideoDownloaderService {
 	}
 }
 
-export const ytDlp = new VideoDownloaderService();
+export const videoDownloader = new VideoDownloaderService();

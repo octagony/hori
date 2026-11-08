@@ -51,6 +51,7 @@ services:
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./storage/downloads:/var/www/storage/downloads
     depends_on:
       - app
     networks:
