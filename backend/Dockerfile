@@ -1,5 +1,6 @@
 FROM node:20-alpine AS base
 
+# hadolint ignore=DL3018
 RUN apk add --no-cache \
         bash \
         curl \
@@ -7,9 +8,7 @@ RUN apk add --no-cache \
         python3 \
         py3-pip
 
-ARG YTDLP_VERSION=2026.10.26
-
-RUN pip3 install --no-cache-dir --break-system-packages "yt-dlp==${YTDLP_VERSION}"
+RUN pip3 install --no-cache-dir --break-system-packages yt-dlp
 
 WORKDIR /var/www
 
