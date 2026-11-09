@@ -25,3 +25,7 @@ lerna-debug.log*
 # STORAGE
 storage
 storage/*
+
+#DIST
+dist
+dist/*
