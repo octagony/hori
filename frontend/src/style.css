@@ -1,9 +1,10 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap');
+
+@import "tailwindcss";
 @source "../**/*.{html,js,css}";
 
 @plugin "daisyui" {
-  themes: horiLight, horiDark;
+  themes: light --default, dark --prefersdark;
 }
 
 @theme {
@@ -25,9 +26,9 @@
 
 @custom-variant dark (&:where([data-theme=horiDark], [data-theme=horiDark] *));
 
-:root[data-theme="horiLight"] {
-  --p: #343a40;
-  --s: #495057;
+:root[data-theme="light"] {
+  --color-primary: #343a40;
+  --color-secondary: #495057;
   --a: #6c757d;
   --n: #212529;
   --b1: #f8f9fa;
@@ -39,9 +40,9 @@
   --er: #f87272;
 }
 
-:root[data-theme="horiDark"] {
-  --p: #e9ecef;   
-  --s: #ced4da;
+:root[data-theme="dark"] {
+  --color-primary: #e9ecef;   
+  --color-secondary: #ced4da;
   --a: #adb5bd;
   --n: #f8f9fa;
   --b1: #212529;

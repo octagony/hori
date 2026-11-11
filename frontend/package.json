@@ -4,11 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build:css": "tailwindcss -i ./src/css/input.css -o ./dist/style.css --minify",
-    "watch:css": "tailwindcss -i ./src/css/input.css -o ./dist/style.css --watch",
-    "copy:assets": "cp src/index.html dist/ && cp node_modules/htmx.org/dist/htmx.min.js dist/",
-    "build": "npm run build:css && npm run copy:assets",
-    "dev": "npm run copy:assets && npm run watch:css"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
   },
   "keywords": [],
   "author": "",
@@ -17,9 +15,13 @@
   "dependencies": {
     "daisyui": "^5.7.50",
     "htmx.org": "^4.0.1",
-    "tailwindcss": "^4.3.5"
+    "@tailwindcss/vite": "^4.3.5",
+    "tailwindcss": "^4.3.5",
+    "vite": "^8.3.8"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.5"
+    "@tailwindcss/cli": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "typescript": "^7.0.2"
   }
 }
