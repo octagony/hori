@@ -28,5 +28,14 @@ export default defineConfig({
   server: {
     port: 3001,
     strictPort: true,
+    proxy: {
+      '/api': 'http://127.0.0.1:8080',
+    },
+  },
+  preview: {
+    port: 3001,
+    proxy: {
+      '/api': 'http://127.0.0.1:8080',
+    },
   },
 });

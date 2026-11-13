@@ -1,71 +1,64 @@
 import { spawn } from 'node:child_process';
-import { IVideoInfo } from "@/types/IVideo.interface";
-import { YTDLP_ARG_DUMP_SINGLE_JSON, YTDLP_ARG_FORMAT, YTDLP_ARG_MERGE_OUTPUT_FORMAT, YTDLP_ARG_NO_DOWNLOAD, YTDLP_ARG_NO_PLAYLIST, YTDLP_ARG_NO_WARNINGS, YTDLP_ARG_OUTPUT, YTDLP_ARG_PRINT_JSON, YTDLP_PARAM_BEST_QUALITY, YTDLP_PARAM_MP4 } from "@/utils/constants";
+import { IVideoExecute, IVideoInfo } from "@/types/IVideo.interface";
+import { DOWNLOAD_TIMEOUT_MS, INFO_TIMEOUT_MS } from "@/utils/constants";
 
 export class VideoDownloaderService {
 	private readonly binary: string;
-	private readonly timeoutMs: number;
 
 	constructor() {
 		this.binary = process.env.YTDLP_BINARY!;
-		this.timeoutMs = 60_000;
 	}
 
 	async getInfo(url: string): Promise<IVideoInfo> {
-
 		const args = [
-			YTDLP_ARG_NO_WARNINGS,
-			YTDLP_ARG_NO_PLAYLIST,
-			YTDLP_ARG_DUMP_SINGLE_JSON,
-			YTDLP_ARG_NO_DOWNLOAD,
-			url,
+			'--no-warnings',
+			'--no-playlist',
+			'--dump-single-json',
+			url
 		];
 
-		const stdout = await this.execute(args);
+		const { stdout } = await this.execute(args, INFO_TIMEOUT_MS);
 
 		try {
-			const data = JSON.parse(stdout);
-			return this.normalizeInfo(data);
+			return this.normalizeInfo(JSON.parse(stdout));
 		} catch (err) {
-			throw new Error(`Error in getInfo ${(err as Error).message}`);
+			throw new Error(`Error in getInfo: ${(err as Error).message}`);
 		}
 	}
 
-	private execute(args: string[]): Promise<string> {
+	private execute(
+		args: string[],
+		timeoutMs: number
+	): Promise<IVideoExecute> {
 		return new Promise((resolve, reject) => {
-
-			const proc = spawn(this.binary, args, {
-				stdio: ['ignore', 'pipe', 'pipe'],
-			});
+			const proc = spawn(this.binary, args, { stdio: ['ignore', 'pipe', 'pipe'] });
 
 			let stdout = '';
 			let stderr = '';
 
-			proc.stdout.on('data', (chunk) => {
-				stdout += chunk.toString();
-			});
-
-			proc.stderr.on('data', (chunk) => {
-				stderr += chunk.toString();
-			});
+			proc.stdout.on('data', (chunk) => { stdout += chunk.toString(); });
+			proc.stderr.on('data', (chunk) => { stderr += chunk.toString(); });
 
 			const timer = setTimeout(() => {
-				proc.kill('SIGKILL');
-				reject(new Error(`Timeout error, max time ${this.timeoutMs}`));
-			}, this.timeoutMs);
+				proc.kill('SIGTERM');
+				setTimeout(() => proc.kill('SIGKILL'), 5_000);
+				reject(new Error(`Timeout ${timeoutMs}ms`));
+			}, timeoutMs);
 
 			proc.on('close', (code) => {
 				clearTimeout(timer);
 				if (code === 0) {
-					resolve(stdout);
-				} else {
-					reject(new Error(`Execute error with code ${code}`));
+					resolve({ stdout, stderr, code });
+				}
+
+				if (code !== 0) {
+					reject(new Error(`yt-dlp close with code ${code}`));
 				}
 			});
 
 			proc.on('error', (err) => {
 				clearTimeout(timer);
-				reject(`Process not working ${err.message}`);
+				reject(new Error(`Cant start proccess: ${err.message}`));
 			});
 		});
 	}
@@ -75,17 +68,26 @@ export class VideoDownloaderService {
 		await mkdir(downloadDir, { recursive: true });
 
 		const args = [
-			YTDLP_ARG_NO_WARNINGS,
-			YTDLP_ARG_NO_PLAYLIST,
-			YTDLP_ARG_FORMAT, YTDLP_PARAM_BEST_QUALITY,
-			YTDLP_ARG_OUTPUT, `${downloadDir}/${jobId}.%(ext)s`,
-			YTDLP_ARG_MERGE_OUTPUT_FORMAT, YTDLP_PARAM_MP4,
-			YTDLP_ARG_PRINT_JSON,
+			'--no-warnings',
+			'--no-playlist',
+			'-f', 'bestvideo[ext=mp4][height<=1080]+bestaudio[ext=m4a]/best[ext=mp4][height<=1080]',
+			'-o', `${downloadDir}/.tmp-${jobId}-${Date.now()}.%(ext)s`,
+			'--merge-output-format', 'mp4',
+			'--downloader', 'aria2c',
+			'--downloader-args',
+			'aria2c:-c -j16 -s16 -x16 -k1M --min-split-size=1M --max-connection-per-server=16 --summary-interval=0 --console-log-level=warn',
+			'--concurrent-fragments', '16',
+			'--throttled-rate', '750K',
+			'--retries', '10',
+			'--fragment-retries', '10',
+			'--socket-timeout', '15',
+			'--force-ipv4',
+			'--print-json',
 			url,
 		];
 
 		try {
-			const stdout = await this.execute(args);
+			const { stdout } = await this.execute(args, DOWNLOAD_TIMEOUT_MS);
 
 			const lines = stdout.trim().split('\n');
 			const lastLine = lines[lines.length - 1]!;

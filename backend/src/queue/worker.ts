@@ -3,8 +3,6 @@ import { DOWNLOADS_WORKER_NAME } from "@/utils/constants";
 import { Worker } from "bullmq";
 
 const downloadWorker = new Worker(DOWNLOADS_WORKER_NAME, async (job) => {
-	console.log('Download Worker START');
-
 	try {
 		await job.updateProgress(10);
 

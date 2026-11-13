@@ -1,5 +1,4 @@
 @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap');
-
 @import 'tailwindcss';
 
 @plugin "daisyui" {
@@ -69,4 +68,8 @@ body {
     min-width: 24px;
     min-height: 24px;
   }
+
+  input:-webkit-autofill{
+    -webkit-text-fill-color: var(--color-primary) !important;
+}
 }
