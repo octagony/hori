@@ -1,29 +1,26 @@
 import { defineConfig } from 'vite';
 import tailwindcss from '@tailwindcss/vite';
-import { resolve } from 'path';
+import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
   plugins: [tailwindcss()],
   resolve: {
     alias: {
-      '@': resolve(__dirname, './src'),
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
     rollupOptions: {
-      input: {
-        main: resolve(__dirname, 'src/main.ts'),
-      },
+      input: fileURLToPath(new URL('./index.html', import.meta.url)),
       output: {
-        entryFileNames: 'js/[name].js',
+        entryFileNames: 'js/[name]-[hash].js',
         chunkFileNames: 'js/[name]-[hash].js',
         assetFileNames: (assetInfo) => {
-          if (assetInfo.names?.includes('.css')) {
-            return 'css/[name][extname]';
-          }
-          return 'assets/[name]-[hash][extname]';
+          const names = assetInfo.names ?? [];
+          const isCss = names.some((n) => n.endsWith('.css'));
+          return isCss ? 'css/[name]-[hash][extname]' : 'assets/[name]-[hash][extname]';
         },
       },
     },

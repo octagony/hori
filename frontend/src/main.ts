@@ -27,7 +27,6 @@ if (themeToggle) {
 	themeToggle.addEventListener('change', async (e) => {
 		const target = e.target as HTMLInputElement;
 		const newTheme = target.checked ? 'dark' : 'light';
-
 		await switchTheme(newTheme, false);
 	});
 }
@@ -53,6 +52,11 @@ const switchTheme = async (newTheme: string, updateToggle: boolean = false): Pro
 	await transition.finished;
 };
 
+document.addEventListener('DOMContentLoaded', () => {
+    requestAnimationFrame(() => {
+        document.body.classList.add('ready');
+    });
+});
 
 function main() {
 	checkTheme();

@@ -1,61 +1,40 @@
 @import url('https://fonts.googleapis.com/css2?family=Cabin:ital,wght@0,400..700;1,400..700&display=swap');
 
-@import "tailwindcss";
-@source "../**/*.{html,js,css}";
-
+@import 'tailwindcss';
 
 @plugin "daisyui" {
   themes: light --default, dark --prefersdark;
 }
 
-@layer base {
-  ::view-transition-group(root) {
-    animation-timing-function: var(--expo-out);
+@theme {
+  --font-sans: 'Cabin', sans-serif;
+  --animate-fade-in: fadeIn 0.4s ease-out;
+  --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes fadeIn {
+    0% {
+      opacity: 0;
+    }
+    100% {
+      opacity: 1;
+    }
   }
 
-  ::view-transition-new(root) {
-    mask: url('data:image/svg+xml,<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M0 0H40L0 40V0Z" fill="url(%23paint0_linear_16_14)"/><defs><linearGradient id="paint0_linear_16_14" x1="0" y1="0" x2="20.5" y2="20.5" gradientUnits="userSpaceOnUse"><stop stop-color="current"/><stop offset="0.84506" stop-color="current" stop-opacity="0.99"/><stop offset="0.9506" stop-color="current" stop-opacity="0"/><stop offset="1" stop-color="current" stop-opacity="0"/></linearGradient></defs></svg>')
-      top left / 0 no-repeat;
-    mask-origin: top left;
-    animation: scale 0.5s;
-    animation-fill-mode: both;
-  }
-
-  ::view-transition-old(root),
-  .dark::view-transition-old(root) {
-    animation: scale 0.5s;
-    animation-fill-mode: both;
-    z-index: -1;
-    transform-origin: top left;
-  }
-
-  @keyframes scale {
-    to {
-      mask-size: 200vmax;
+  @keyframes slideUp {
+    0% {
+      transform: translateY(20px);
+      opacity: 0;
+    }
+    100% {
+      transform: translateY(0);
+      opacity: 1;
     }
   }
 }
 
-@theme {
-  --font-sans: 'Cabin', sans-serif;
-  
-  --animate-fade-in: fadeIn 0.4s ease-out;
-  --animate-slide-up: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-  
-  @keyframes fadeIn {
-    0% { opacity: 0; }
-    100% { opacity: 1; }
-  }
-  
-  @keyframes slideUp {
-    0% { transform: translateY(20px); opacity: 0; }
-    100% { transform: translateY(0); opacity: 1; }
-  }
-}
+@custom-variant dark (&:where([data-theme=dark], [data-theme=dark] *));
 
-@custom-variant dark (&:where([data-theme=horiDark], [data-theme=horiDark] *));
-
-:root[data-theme="light"] {
+:root[data-theme='light'] {
   --color-primary: #343a40;
   --color-secondary: #495057;
   --color-accent: #6c757d;
@@ -69,8 +48,8 @@
   --color-error: #f87272;
 }
 
-:root[data-theme="dark"] {
-  --color-primary: #e9ecef;   
+:root[data-theme='dark'] {
+  --color-primary: #e9ecef;
   --color-secondary: #ced4da;
   --color-accent: #adb5bd;
   --color-neutral: #f8f9fa;
@@ -81,8 +60,4 @@
   --color-success: #36d399;
   --color-warning: #fbbd23;
   --color-error: #f87272;
-}
-
-body {
-  transition: background-color 0.3s ease, color 0.3s ease;
 }
