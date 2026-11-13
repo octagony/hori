@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -45,7 +46,99 @@
             </label>
         </div>
     </header>
+
+    <main class="flex-1 w-full max-w-4xl mx-auto px-4 py-10 md:py-16">
+        <section class="text-center mb-8 animate-fade-in">
+            <h1 class="text-3xl sm:text-4xl">
+                Download everything from everywhere
+            </h1>
+            <p class="text-secondary/80 md:text-lg py-2">Quick and easy — paste link and click “Download”</p>
+        </section>
+
+        <form class="flex flex-col sm:flex-row gap-3 mb-8 animate-slide-up" hx-post="/api/download" hx-target="#result"
+            hx-swap="innerHTML" hx-indicator="#submit-spinner" hx-disabled-elt="find button">
+
+            <label class="input validator w-full relative">
+                <svg class="h-[1em] opacity-50" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <g stroke-linejoin="round" stroke-linecap="round" stroke-width="2.5" fill="none"
+                        stroke="currentColor">
+                        <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path>
+                        <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path>
+                    </g>
+                </svg>
+                <input id="url" type="url" required placeholder="Paste link here"
+                    pattern="^(https?://)?([a-zA-Z0-9]([a-zA-Z0-9\-].*[a-zA-Z0-9])?\.)+[a-zA-Z].*$"
+                    title="Must be valid URL" />
+            </label>
+
+            <button type="submit" class="btn btn-active gap-2 max-w-fit self-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                    stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Download</span>
+                <span id="submit-spinner" class="loading loading-spinner loading-xs htmx-indicator">
+                </span>
+            </button>
+        </form>
+
+        <div id="result" class="mb-12"></div>
+
+        <section class="bg-base-200 border border-base-300 rounded-3xl p-6 md:p-10">
+            <div class="grid gap-8 md:grid-cols-3">
+
+                <article class="text-center">
+                    <div class="mx-auto mb-4 grid place-content-center size-14 rounded-2xl bg-info/15 text-info">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2" style="width:26px;height:26px">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-2 text-md md:text-xl">Caching</h3>
+                    <p class="text-sm md:text-base text-base-content/60 leading-relaxed">
+                        Fast file loading is ensured by file caching. See for yourself!
+                    </p>
+                </article>
+
+                <article class="text-center">
+                    <div class="mx-auto mb-4 grid place-content-center size-14 rounded-2xl bg-success/15 text-success">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2" style="width:26px;height:26px">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-2 text-md md:text-xl">No ads & registration</h3>
+                    <p class="text-base-content/60 leading-relaxed text-sm md:text-base">
+                        Just paste the link. No accounts, logins, or unnecessary steps.
+                    </p>
+                </article>
+
+                <article class="text-center">
+                    <div class="mx-auto mb-4 grid place-content-center size-14 rounded-2xl bg-primary/10 text-primary">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+                            stroke-width="2" style="width:26px;height:26px">
+                            <path stroke-linecap="round" stroke-linejoin="round"
+                                d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                    <h3 class="font-semibold mb-2 text-md md:text-xl">It works everywhere</h3>
+                    <p class="text-base-content/60 leading-relaxed text-sm md:text-base">
+                        Windows, macOS, Linux — you only need a browser. No installation is required.
+                    </p>
+                </article>
+
+            </div>
+        </section>
     </main>
+
+    <footer class="border-t border-base-300 py-6 text-center text-sm text-base-content/50">
+        Hori — just insert the link. We’ll do the rest for you.
+    </footer>
+
+    <div id="toast" class="toast toast-end z-100"></div>
     <script type="module" src="/src/main.ts"></script>
 </body>
+
 </html>
